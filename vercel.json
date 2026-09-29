@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/ap1/:pfad*",
+      "destination": "http://49.13.228.161/ap1/:pfad*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/ap1/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}

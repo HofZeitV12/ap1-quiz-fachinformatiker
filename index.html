@@ -635,7 +635,10 @@ try {
   const g = JSON.parse(localStorage.getItem(STORE));
   if (g && g.tasks) fortschritt = Object.assign(fortschritt, g);
 } catch (e) { /* Speicher nicht verfügbar */ }
-const speichern = () => { try { localStorage.setItem(STORE, JSON.stringify(fortschritt)); } catch (e) {} };
+const speichern = () => {
+  try { localStorage.setItem(STORE, JSON.stringify(fortschritt)); } catch (e) {}
+  syncPlanen();
+};
 
 function quote() {
   let p = 0, m = 0;
@@ -2858,6 +2861,135 @@ function passtJahr(aufgabe) {
 }
 
 /* ============================================================
+   PROFILE
+   Jeder Nutzer bekommt einen Namen und eine Profil-Kennung (primary key).
+   Die Kennung bleibt im Browser gespeichert — auf demselben Rechner ist man
+   damit beim nächsten Öffnen schon angemeldet. Auf einem anderen Rechner
+   wählt man sein Profil aus der Liste.
+
+   Der Fortschritt liegt im Backend (getrennte Datenbank auf dem eigenen
+   Server), damit Schulrechner und Heim-PC denselben Stand zeigen.
+   ============================================================ */
+const PROFIL_STORE = 'ap1-trainer-profil';
+const API = '/ap1';
+const DECKUNG = 0.85;          // ab wann der Server-Stand den lokalen ersetzt
+
+let profil = null;             // { id, name, jahr }
+let profilListe = [];          // Namen für die Auswahl
+let syncStand = 'aus';         // 'aus' | 'gut' | 'fehler'
+
+try {
+  const g = JSON.parse(localStorage.getItem(PROFIL_STORE));
+  if (g && typeof g.id === 'string' && g.id.length === 36) profil = g;
+} catch (e) { /* kein Speicher */ }
+const profilMerken = () => {
+  try {
+    if (profil) localStorage.setItem(PROFIL_STORE, JSON.stringify(profil));
+    else localStorage.removeItem(PROFIL_STORE);
+  } catch (e) { /* kein Speicher */ }
+};
+
+/* ---------- Server-Aufrufe ---------- */
+/* Kein Schlüssel im Browser: Fortschritt und Jahr weisen sich über die
+   Kennung aus. Für das Anlegen neuer Profile genügt der Name — der Server
+   hat eine Obergrenze und eine Bremse gegen zu viele Versuche. */
+async function api(weg, methode = 'GET', koerper) {
+  const r = await fetch(API + weg, {
+    method: methode,
+    headers: koerper ? { 'content-type': 'application/json' } : undefined,
+    body: koerper ? JSON.stringify(koerper) : undefined
+  });
+  let daten = null;
+  try { daten = await r.json(); } catch (e) { }
+  if (!r.ok) {
+    const e = new Error((daten && daten.fehler) || ('Server antwortete ' + r.status));
+    e.status = r.status;
+    throw e;
+  }
+  return daten;
+}
+
+/* Holt die Namen, die schon vergeben sind. */
+async function profileLaden() {
+  try {
+    const j = await api('/profile');
+    profilListe = (j.profile || []).map(p => ({ id: p.id, name: p.name, jahr: p.jahr }));
+    return profilListe;
+  } catch (e) {
+    profilListe = [];
+    return [];
+  }
+}
+
+/* Schreibt den Fortschritt zum Server. Wird gebündelt aufgerufen, damit
+   nicht jede einzelne Antwort eine Anfrage auslöst. */
+let syncGeber = null;
+function syncPlanen() {
+  if (!profil) return;
+  clearTimeout(syncGeber);
+  syncGeber = setTimeout(() => syncJetzt(), 1200);
+}
+
+async function syncJetzt() {
+  if (!profil) return;
+  try {
+    await api('/fortschritt/' + profil.id, 'PUT', {
+      data: {
+        tasks: fortschritt.tasks,
+        serie: fortschritt.serie,
+        punkte: fortschritt.punkte,
+        karten: kartenFaecher,
+        stand: new Date().toISOString()
+      }
+    });
+    syncStand = 'gut';
+  } catch (e) {
+    syncStand = 'fehler';
+  }
+  kopfJahrZeichnen();
+}
+
+/* Holt den Stand vom Server. Nur laden, wenn der Server weiter ist als der
+   Browser — sonst würde ein frisch gelöstes Blatt wieder überschrieben. */
+async function standHolen() {
+  if (!profil) return false;
+  try {
+    const j = await api('/fortschritt/' + profil.id);
+    const d = j && j.data;
+    if (!d || !d.tasks) return false;
+
+    const servPunkte = Object.values(d.tasks).reduce((a, t) => a + (t.max || 0), 0);
+    const lokalPunkte = Object.values(fortschritt.tasks).reduce((a, t) => a + (t.max || 0), 0);
+
+    if (servPunkte > 0 && (lokalPunkte === 0 || servPunkte >= lokalPunkte * DECKUNG)) {
+      fortschritt.tasks = d.tasks || {};
+      fortschritt.serie = d.serie || 0;
+      fortschritt.punkte = d.punkte || 0;
+      if (d.karten && typeof d.karten === 'object') kartenFaecher = d.karten;
+      try { localStorage.setItem(STORE, JSON.stringify(fortschritt)); } catch (e) { }
+      try { localStorage.setItem(KARTEN_STORE, JSON.stringify(kartenFaecher)); } catch (e) { }
+      syncStand = 'gut';
+      return true;
+    }
+    return false;
+  } catch (e) {
+    syncStand = 'fehler';
+    return false;
+  }
+}
+
+/* ---------- Jahr wechseln, auch am Server ---------- */
+async function jahrZumServer(j) {
+  if (!profil || !j) return;
+  try {
+    await api('/profile/' + profil.id + '/jahr', 'PUT', { jahr: j });
+    profil.jahr = j;
+    profilMerken();
+  } catch (e) { /* Das Jahr bleibt lokal richtig; der Server zieht beim nächsten Mal nach. */ }
+}
+
+
+/* ============================================================
    ZUSTAND & RENDERING
    ============================================================ */
 let aktuell = null;     // { task, inst }
@@ -2970,7 +3102,11 @@ function railZeichnen() {
   b4.className = 'rail-item'; b4.type = 'button';
   b4.innerHTML = '<span>Ausbildungsjahr wechseln</span><span class="z">' + jahrKurz() + '</span>';
   b4.onclick = () => { jahrAuswahlZeigen(); mobilEinklappen(); };
-  fuss.append(b1, b2, b3, b4);
+  const b5 = document.createElement('button');
+  b5.className = 'rail-item'; b5.type = 'button';
+  b5.innerHTML = '<span>Profil wechseln</span><span class="z">' + (profil ? profil.name : '–') + '</span>';
+  b5.onclick = () => { abmelden(); mobilEinklappen(); };
+  fuss.append(b1, b2, b3, b4, b5);
   rail.appendChild(fuss);
 }
 
@@ -3340,12 +3476,22 @@ function ersteAufgabe() { return TASKS.filter(passtJahr)[0] || TASKS[0]; }
 
 function kopfJahrZeichnen() {
   const el = document.querySelector('.kopf .unter');
-  if (el) el.textContent = 'Ausbildungsjahr: ' + jahrKurz();
+  if (!el) return;
+  const teile = [];
+  if (profil) teile.push(profil.name);
+  teile.push('Ausbildungsjahr: ' + jahrKurz());
+  if (profil) {
+    teile.push(syncStand === 'gut' ? 'gespeichert'
+      : syncStand === 'fehler' ? 'nur auf diesem Rechner'
+        : 'wird gespeichert');
+  }
+  el.textContent = teile.join(' · ');
 }
 
 function jahrSetzen(j) {
   jahr = j;
   jahrSpeichern();
+  jahrZumServer(j);
   startseiteZeigen();
 }
 
@@ -3420,6 +3566,116 @@ function infoVerdrahten() {
   };
 }
 
+/* ---------- Anmeldung: Name wählen oder neu anlegen ---------- */
+async function profilAuswahlZeigen() {
+  modus = 'start';
+  sim = null;
+  clearInterval(zeitGeber);
+
+  blatt.innerHTML = `
+    <div class="kopfstreifen">
+      <h2>Wer lernt hier?</h2>
+      <div class="meta">Der gewählte Name bleibt auf diesem Rechner gespeichert.</div>
+    </div>
+    <div class="start">
+      <p id="pf-lade">Profile werden geladen …</p>
+      <div id="pf-liste"></div>
+      <h3 style="margin-top:22px">Neuer Name</h3>
+      <p>Jeder Name gibt es nur einmal — ein zweites „Anna" ist nicht möglich.</p>
+      <p><input type="text" id="pf-neu" maxlength="40" autocomplete="off"
+        placeholder="Name eingeben" style="font-size:15px;padding:8px 11px;border:1px solid var(--schwach);border-radius:var(--r);min-width:220px">
+        <button class="akt" type="button" id="pf-anlegen">Anlegen</button></p>
+      <p id="pf-fehler" role="status" aria-live="polite" style="color:var(--rot)"></p>
+    </div>`;
+
+  const liste = document.getElementById('pf-liste');
+  const fehler = document.getElementById('pf-fehler');
+
+  const namen = await profileLaden();
+  document.getElementById('pf-lade').remove();
+
+  if (!namen.length) {
+    liste.innerHTML = '<p><i>Noch keine Profile angelegt.</i></p>';
+  } else {
+    liste.innerHTML = `<h3>Vorhandene Profile</h3>
+      <div class="formate">${namen.map(p =>
+        `<button class="format" type="button" data-id="${p.id}">
+           <b>${p.name}</b><span>${jahrName(p.jahr)}</span></button>`).join('')}</div>`;
+    liste.querySelectorAll('[data-id]').forEach(b => {
+      b.onclick = () => {
+        const p = namen.find(x => x.id === b.dataset.id);
+        anmelden(p);
+      };
+    });
+  }
+
+  document.getElementById('pf-anlegen').onclick = async () => {
+    const feld = document.getElementById('pf-neu');
+    const name = feld.value.trim();
+    fehler.textContent = '';
+    if (!name) { fehler.textContent = 'Bitte einen Namen eingeben.'; feld.focus(); return; }
+    const knopf = document.getElementById('pf-anlegen');
+    knopf.disabled = true;
+    try {
+      const j = await api('/profile', 'POST', { name, jahr: 1 });
+      await anmelden(j.profil);
+    } catch (e) {
+      fehler.textContent = e.message;
+      knopf.disabled = false;
+      feld.focus();
+      feld.select();
+    }
+  };
+  document.getElementById('pf-neu').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('pf-anlegen').click();
+  });
+  kopfJahrZeichnen();
+  railZeichnen();
+}
+
+function jahrName(j) {
+  const x = JAHRE.find(y => y.id === j);
+  return x ? x.name : '1. Ausbildungsjahr';
+}
+
+/* ---------- Anmelden ---------- */
+async function anmelden(p) {
+  if (!p || !p.id) return;
+  profil = { id: p.id, name: p.name, jahr: p.jahr || 1 };
+  profilMerken();
+  jahr = profil.jahr;
+
+  /* Lokalen Fortschritt dieses Rechners verwerfen, damit nicht der Stand
+     eines anderen Namens hängen bleibt. Danach den eigenen holen. */
+  fortschritt = { tasks: {}, serie: 0, punkte: 0 };
+  kartenFaecher = {};
+  try { localStorage.removeItem(STORE); } catch (e) { }
+  try { localStorage.removeItem(KARTEN_STORE); } catch (e) { }
+
+  await standHolen();
+  statistikZeichnen();
+  startseiteZeigen();
+}
+
+function abmelden() {
+  profil = null;
+  profilMerken();
+  jahr = null;
+  jahrSpeichern();
+  fahrplanZuruecksetzen();
+  profilAuswahlZeigen();
+}
+
+/* Beim Wechsel des Namens lernt der Trainer neu — das ist gewollt,
+   weil der Fortschritt am Namen hängt, nicht am Rechner. */
+function fahrplanZuruecksetzen() {
+  fortschritt = { tasks: {}, serie: 0, punkte: 0 };
+  kartenFaecher = {};
+  try { localStorage.removeItem(STORE); } catch (e) { }
+  try { localStorage.removeItem(KARTEN_STORE); } catch (e) { }
+  statistikZeichnen();
+}
+
 function jahrAuswahlZeigen() {
   modus = 'start';
   sim = null;
@@ -3470,6 +3726,9 @@ function nichtsDa(formatName) {
 }
 
 function startseiteZeigen() {
+  /* Ohne Profil gibt es nichts zu zeigen — die Anmeldung erscheint immer.
+     (Ein Vergleich mit `modus` wäre hier falsch: der startet als 'rechnen'.) */
+  if (!profil) { profilAuswahlZeigen(); return; }
   if (jahr === null) { jahrAuswahlZeigen(); return; }
   modus = 'start';
   kopfJahrZeichnen();
@@ -3701,7 +3960,10 @@ try {
   const g = JSON.parse(localStorage.getItem(KARTEN_STORE));
   if (g && typeof g === 'object') kartenFaecher = g;
 } catch (e) { /* kein Speicher */ }
-const kartenSpeichern = () => { try { localStorage.setItem(KARTEN_STORE, JSON.stringify(kartenFaecher)); } catch (e) {} };
+const kartenSpeichern = () => {
+  try { localStorage.setItem(KARTEN_STORE, JSON.stringify(kartenFaecher)); } catch (e) {}
+  syncPlanen();
+};
 
 function starteKarten(bereich) {
   modus = 'karten';

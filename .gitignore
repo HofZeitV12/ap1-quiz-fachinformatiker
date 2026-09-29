@@ -1,0 +1,11 @@
+# Vercel
+.vercel
+
+# Node (nur Hilfsskripte auf oberer Ebene)
+node_modules
+npm-debug.log*
+
+# Lokale Umgebung mit Zugangsdaten — NICHT ins Repo
+.env.local
+.env
+.env.*.local

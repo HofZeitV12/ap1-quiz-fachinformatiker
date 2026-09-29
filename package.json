@@ -6,7 +6,8 @@
   "description": "Oberfläche des AP1-Trainers — Lern-App zur Prüfungsvorbereitung Teil 1 (IHK).",
   "scripts": {
     "test": "node tools/pruefe-frontend.mjs",
-    "check": "node tools/pruefe-frontend.mjs"
+    "check": "node tools/pruefe-frontend.mjs",
+    "analyse": "node tools/analysiere-inhalte.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -16,7 +16,7 @@
 //   8. vercel.json
 //
 // Rückgabewert 1, sobald etwas fehlschlägt.
-import { readFileSync, existsSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, mkdtempSync, rmSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve, relative, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -263,6 +263,29 @@ for (const ziel of verweise) {
   }
 }
 if (!tote) ok(verweise.length + ' Verweise — keiner zeigt auf eine fehlende lokale Datei');
+console.log('');
+
+/* ============================================================
+   8a. Werkzeuge in tools/
+   Die Prüfwerkzeuge selbst müssen laufen. Ein Werkzeug mit Syntaxfehler
+   meldet keinen Fehler — es stürzt ab, und niemand merkt es.
+   ============================================================ */
+console.log('8a. Werkzeuge');
+const werkzeugOrdner = join(WURZEL, 'tools');
+if (!existsSync(werkzeugOrdner)) {
+  fehl('tools/ fehlt');
+} else {
+  const werkzeuge = readdirSync(werkzeugOrdner).filter(f => f.endsWith('.mjs'));
+  for (const datei of werkzeuge) {
+    try {
+      execFileSync(process.execPath, ['--check', join(werkzeugOrdner, datei)], { stdio: 'pipe' });
+      ok('tools/' + datei + ' syntaktisch gültig');
+    } catch (e) {
+      fehl('tools/' + datei + ' hat einen Syntaxfehler',
+        String(e.stderr || e.message).split('\n').filter(Boolean).slice(0, 3).join(' / '));
+    }
+  }
+}
 console.log('');
 
 /* ============================================================

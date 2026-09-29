@@ -1,0 +1,14 @@
+{
+  "name": "ap1-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Oberfläche des AP1-Trainers — Lern-App zur Prüfungsvorbereitung Teil 1 (IHK).",
+  "scripts": {
+    "test": "node tools/pruefe-frontend.mjs",
+    "check": "node tools/pruefe-frontend.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,25 @@
+# Zeilenenden festnageln.
+#
+# Grund: core.autocrlf steht auf Windows-Rechnern häufig auf true. Dann
+# unterscheidet sich die Arbeitskopie von dem, was im Repository liegt
+# (index.html: im Repo LF, lokal CRLF). Das verfälscht jeden Vergleich und
+# jede Zeilenangabe in einem Vorschlag.
+#
+# Deshalb: im Repository immer LF, unabhängig von der Einstellung des Rechners.
+* text=auto eol=lf
+
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Binärdateien nie umwandeln.
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.pdf  binary

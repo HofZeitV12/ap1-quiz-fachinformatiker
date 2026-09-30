@@ -4,6 +4,50 @@ Das Format folgt *Keep a Changelog*. Bruchstellen sind ausdrücklich gekennzeich
 
 ## [Nicht veröffentlicht]
 
+### Geändert — Oberfläche, Umbau von Aufbau und Design (2026-09-30)
+
+Rein darstellend. **Keine Aufgabendaten, keine Wege, keine Vertragswerte und
+keine Regeln geändert** — der Inhalt und die sechs Formate sind unverändert.
+
+- **Kopfzeile in drei Zonen getrennt.** Vorher lagen Titel, Wahl (Jahr, Profil)
+  und Auskunft (Punkte, Quote, Serie) in einer undifferenzierten Reihe; das Auge
+  musste über die Knöpfe steigen, um zum Stand zu kommen. Jetzt: links was das
+  hier ist, rechts die Wahl, darunter der Stand. Der Speicher-Zustand ist von der
+  Unterzeile in eine eigene kleine Zeile über der Wahl gewandert und damit auch
+  auf dem Handy sichtbar. Das **Ausbildungsjahr hat einen eigenen Knopf in der
+  Kopfzeile** bekommen; es ist die Wahl, die den sichtbaren Stoff bestimmt, und
+  stand vorher nur im Menü „Mehr" (dort entfernt — ein Weg, nicht zwei).
+- **Ein Fortschrittsmaß statt nur Zahlen.** Neben Punkten, Quote und Serie steht
+  jetzt ein Balken mit Viertelmarken („x % bearbeitet") — der Weg ist eine
+  Strecke, keine Zahl. Er zählt ausschließlich die Rechenaufgaben des gewählten
+  Ausbildungsjahrs; mehr gibt der Vertrag mit zwei Tabellen nicht her.
+- **Die Seitenleiste hat vier erkennbare Ebenen.** Vorher waren 43 Einträge
+  13,5 px auf 38 px und unterschieden sich nur durch das Zeichen „↳". Jetzt:
+  Formate als gerahmter, nummerierter Block · Bereich als Titelzeile (nicht
+  anklickbar) · Aufgabe eingerückt mit Fortschrittsmarke · Quiz/Karten zum
+  Bereich kleiner und weiter eingerückt, ohne Fortschrittszahl.
+- **Drei Flächengewichte statt eines.** Neun Stellen trugen dieselbe Kante
+  `border-top:3px solid tinte` — eine Quellenliste wog damit so schwer wie eine
+  laufende Rechenaufgabe. Jetzt: ruhige Fläche (Startseite, Quellen), Blatt mit
+  Gewichtskante (Kalkulation, Quiz, Karte, Fallstudie, Dialog), streng (rot).
+- **Ein wiederkehrendes Zeichen.** Der kurze Querstrich vor einer Abschnitts-
+  und Bereichsüberschrift bindet Kopfzeile, Liste und Blatt aneinander.
+- **Startseite beginnt mit „Heute lernen"** statt zum dritten Mal den Namen des
+  Programms zu wiederholen. Die sechs Formate sind als Wahl gesetzt (Nummer,
+  Umfang, Name), nicht als Kartenreihe; das Raster bleibt auch auf dem Handy
+  zweispaltig und fällt erst unter 380 px auf eine Spalte.
+- **Tippziele mindestens 44 px**, `overscroll-behavior` gegen ungewollte
+  Seitwärtsgesten, `theme-color` ergänzt.
+
+### Behoben — Tastaturbedienung
+
+- **Die Seitenleiste hatte keinen sichtbaren Fokusring.** Rund 50 Knöpfe, durch
+  die man nur mit Tab kommt, ohne je zu sehen, wo man steht. `.rail-item` und
+  `button.akt` haben jetzt `:focus-visible` (nachgeprüft: alle zwölf
+  interaktiven Muster der Oberfläche tragen einen Fokusring).
+- Die Kopfzeile wuchs mobil auf 234 px, weil der Speicher-Zustand die Knöpfe in
+  zwei Reihen drängte. Jetzt stehen die vier Schalter in einer Reihe bei 208 px.
+
 ### Hinzugefügt
 
 - **Inhaltsanalyse** `npm run analyse` (`tools/analysiere-inhalte.mjs`).

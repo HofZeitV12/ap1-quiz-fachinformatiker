@@ -54,6 +54,41 @@ Das Format folgt *Keep a Changelog*. Bruchstellen sind ausdrücklich gekennzeich
 - `index.html` und `vercel.json` — dieser Vorgang war das Qualitätstor.
   Am Inhalt, an den Aufgaben und an der Darstellung wurde nichts angefasst.
 
+### Hinzugefügt — Oberfläche (UX/UI-Überarbeitung 2026-09-30)
+
+- **Rückweg zur Übersicht** (`Übersicht` in der Kopfzeile, `btn-uebersicht`).
+  Erscheint nur beim Lernen und behält den Fortschritt – im Unterschied zum
+  Zurücksetzen. Vorher gab es aus dem Lernfluss nur den Browser-Zurück-Knopf
+  oder den prominenten „Fortschritt zurücksetzen".
+- **Profil-Knopf in der Kopfzeile** (`btn-profil`). Name und Ausbildungsjahr
+  waren auf dem Handy nur über die eingeklappte Seitenleiste erreichbar; jetzt
+  steht „Profil: <Name>" immer sichtbar oben, mit `aria-label`.
+- **Fortschrittsbalken im Quiz** (`.fortschrittsbalken`) unter dem Quizkopf –
+  zeigt die Position in der Runde („Frage 3 von 12"). Der Zähler allein stand
+  zu weit weg vom Geschehen.
+- **Marken an der Quiz-Auflösung** (`.urteil-marke`): ✓ an der richtigen,
+  ✗ an der falsch gewählten Antwort. Die Farbe allein war beim schnellen
+  Durchklicken zu schwach.
+- **Farbige Erklärungsbox**: grün bei richtiger, rot bei falscher Antwort
+  (`#quiz-erklaerung.gut` / `.schlecht`) – vorher immer neutral.
+- **Lesehilfe in der Seitenleiste** (`.rail-legende`): erklärt, dass der
+  Prozentwert an einem Bereich die AP1-Häufigkeit ist und die Zahl rechts an
+  einer Aufgabe der eigene Fortschritt. Beides war leicht zu verwechseln.
+- **Aktiv-Markierung** für „↳ Quiz/Karteikarten zu diesem Bereich" in der
+  Seitenleiste, wenn genau dieser Bereich läuft.
+- **Sichere Ränder auf Geräten mit Notch** über `env(safe-area-inset-*)`
+  (`.kopf`, `.blatt`, `.rail`) und `viewport-fit=cover`.
+
+### Geändert — Oberfläche (UX/UI-Überarbeitung 2026-09-30)
+
+- **„Formate 6"** wird jetzt als getrennte Flex-Zeile ausgegeben. Vorher
+  entstand im Screenreader und in der Semantik die zusammengeklebte Zeichen-
+  kette „Formate6" (die Zahl klebte am Text).
+- **Quiz-Knöpfe umbenannt:** „Nächste Frage" → **„Weiter"**, „Neue Fragen" →
+  **„Neues Set"**. Die alten Beschriftungen klangen fast gleich.
+- **Zurücksetzen-Warnung** nennt jetzt die Folge: „…betrifft alle Aufgaben,
+  Quizfragen und Karten dieses Profils und lässt sich nicht rückgängig machen."
+
 ## [1.0.0] — bis 2026-09-29
 
 ### Hinzugefügt

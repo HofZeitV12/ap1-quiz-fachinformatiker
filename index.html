@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AP1-Trainer · Kaufmann für IT-System-Management</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,6 +181,7 @@ h1,h2,h3{text-wrap:balance;scroll-margin-top:14px}
 .rail-item .z{font-family:var(--mono);font-size:11px;color:var(--schwach);font-variant-numeric:tabular-nums}
 .rail-item .z.voll{color:var(--gruen)}
 .rail-fuss{border-top:1px solid var(--linie);margin-top:8px;padding-top:14px}
+.rail-legende{font-size:11px;line-height:1.45;color:var(--schwach);margin:0 0 16px;padding:0 18px}
 
 /* ---------- Blatt ---------- */
 .blatt{padding:28px 30px 80px;max-width:900px;scroll-margin-top:14px}
@@ -374,6 +375,12 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
 .quiz-opt.richtig .buchstabe{border-color:var(--gruen);color:var(--gruen)}
 .quiz-opt.falsch{border-color:var(--rot);background:var(--rot-hell)}
 .quiz-opt.falsch .buchstabe{border-color:var(--rot);color:var(--rot)}
+.quiz-opt .urteil-marke{
+  margin-left:auto;padding-left:10px;font-family:var(--mono);
+  font-size:15px;font-weight:600;line-height:1.2;
+}
+.quiz-opt.richtig .urteil-marke{color:var(--gruen)}
+.quiz-opt.falsch .urteil-marke{color:var(--rot)}
 .quiz-opt:disabled{cursor:default}
 .quiz-opt:focus-visible{outline:2px solid var(--tinte);outline-offset:-1px}
 .quiz-erklaerung{
@@ -381,7 +388,12 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   border-left:3px solid var(--tinte);font-size:13.5px;max-width:70ch;
 }
 .quiz-erklaerung b{font-weight:600}
+#quiz-erklaerung.gut .quiz-erklaerung{border-left-color:var(--gruen);background:var(--gruen-hell)}
+#quiz-erklaerung.schlecht .quiz-erklaerung{border-left-color:var(--rot);background:var(--rot-hell)}
 .quiz-fortschritt{font-family:var(--mono);font-size:12.5px;color:var(--schwach);font-variant-numeric:tabular-nums}
+/* Schmaler Fortschrittsbalken unter dem Quizkopf – zeigt Position in der Runde */
+.fortschrittsbalken{height:3px;background:var(--linie-hell);margin:-22px 0 20px;overflow:hidden}
+.fortschrittsbalken > i{display:block;height:100%;background:var(--tinte);transition:width .25s ease}
 
 /* ---------- Karteikarten ---------- */
 .karten-stapel{max-width:620px}
@@ -490,6 +502,14 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   padding:6px 13px;border-radius:var(--r);cursor:pointer;
 }
 .rail-toggle:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
+/* Rückweg zur Übersicht – im Lernfluss sichtbar, ohne den Fortschritt zu löschen */
+.heim{
+  font:inherit;font-size:13px;font-weight:500;
+  background:transparent;color:var(--tinte);border:1px solid var(--schwach);
+  padding:6px 13px;border-radius:var(--r);cursor:pointer;
+}
+.heim:hover{background:var(--papier);border-color:var(--tinte)}
+.heim:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
 
 @media (max-width:900px){
   /* minmax(0,1fr) statt 1fr: sonst erzwingt der min-content der Zelle
@@ -497,15 +517,16 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   .raster{grid-template-columns:minmax(0,1fr)}
   .rail{
     display:none;position:static;max-height:none;overflow:visible;
-    border-right:0;border-bottom:1px solid var(--linie);padding-bottom:16px;
+    border-right:0;border-bottom:1px solid var(--linie);
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
   }
   body.rail-offen .rail{display:block}
   .rail-toggle{display:inline-block}
-  .kopf{gap:12px;padding:13px 16px}
+  .kopf{gap:12px;padding:13px max(16px,env(safe-area-inset-right)) 13px max(16px,env(safe-area-inset-left))}
   .kopf .unter{display:none}
   .kopf .stats{margin-left:0;gap:16px;width:100%}
   .stat{align-items:flex-start}
-  .blatt{padding:18px 16px 64px;min-width:0}
+  .blatt{padding:18px max(16px,env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));min-width:0}
   .kopfstreifen h2{font-size:19px}
   .kopfstreifen .meta{margin-left:0;text-align:left}
   /* Breite Tabellen duerfen im eigenen Rahmen scrollen statt die Seite zu dehnen */
@@ -563,6 +584,8 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   </h1>
   <span class="unter">Kaufmann für IT-System-Management · Prüfungskatalog 6345</span>
   <button class="rail-toggle" id="rail-toggle" type="button" aria-expanded="false" aria-controls="rail">Aufgabenbereiche</button>
+  <button class="heim" id="btn-uebersicht" type="button" hidden>Übersicht</button>
+  <button class="heim" id="btn-profil" type="button">Profil</button>
   <div class="stats">
     <div class="stat"><b id="st-punkte">0</b><span>Punkte</span></div>
     <div class="stat"><b id="st-quote">–</b><span>Trefferquote</span></div>
@@ -3033,6 +3056,14 @@ function railZeichnen() {
   }
   rail.appendChild(fGruppe);
 
+  /* Kurze Lesehilfe: die Zahlen in der Liste sind Fortschritt, die Prozentwerte
+     an den Bereichen sind AP1-Häufigkeit – ohne diesen Satz sind sie zu leicht
+     zu verwechseln. */
+  const legende = document.createElement('p');
+  legende.className = 'rail-legende';
+  legende.textContent = 'Prozent neben einem Bereich = wie häufig das Thema in AP1 vorkam. Zahl rechts an einer Aufgabe = dein Fortschritt (grün ab 80 %).';
+  rail.appendChild(legende);
+
   /* --- Rechen-Aufgaben nach Bereich --- */
   for (const b of BEREICHE) {
     const aufgaben = TASKS.filter(t => t.bereich === b.id && passtJahr(t));
@@ -3043,7 +3074,7 @@ function railZeichnen() {
     const gruppe = document.createElement('div');
     gruppe.className = 'rail-gruppe';
     const h = document.createElement('h2');
-    h.innerHTML = `<span>${b.name}</span><span class="haeufig" title="Häufigkeit in AP1 (Auswertung 2021–2026)">${b.haeufig}</span>`;
+    h.innerHTML = `<span>${b.name}</span><span class="haeufig" title="Wie häufig dieses Thema in AP1 vorkam (Auswertung 2021–2026)">${b.haeufig}</span>`;
     gruppe.appendChild(h);
 
     for (const t of aufgaben) {
@@ -3063,14 +3094,16 @@ function railZeichnen() {
     /* Direkteinstieg in Quiz/Karten für diesen Bereich */
     if (quizN) {
       const btn = document.createElement('button');
-      btn.className = 'rail-item'; btn.type = 'button';
+      btn.className = 'rail-item' + (modus === 'quiz' && quizLauf && quizLauf.bereich === b.id ? ' aktiv' : '');
+      btn.type = 'button';
       btn.innerHTML = `<span>↳ Quiz zu diesem Bereich</span><span class="z">${quizN}</span>`;
       btn.onclick = () => { sim = null; clearInterval(zeitGeber); starteQuiz(b.id); mobilEinklappen(); };
       gruppe.appendChild(btn);
     }
     if (kartenN) {
       const btn = document.createElement('button');
-      btn.className = 'rail-item'; btn.type = 'button';
+      btn.className = 'rail-item' + (modus === 'karten' && kartenLauf && kartenLauf.bereich === b.id ? ' aktiv' : '');
+      btn.type = 'button';
       btn.innerHTML = `<span>↳ Karteikarten zu diesem Bereich</span><span class="z">${kartenN}</span>`;
       btn.onclick = () => { sim = null; clearInterval(zeitGeber); starteKarten(b.id); mobilEinklappen(); };
       gruppe.appendChild(btn);
@@ -3093,7 +3126,7 @@ function railZeichnen() {
   b3.className = 'rail-item'; b3.type = 'button';
   b3.innerHTML = '<span>Fortschritt zurücksetzen</span><span class="z">reset</span>';
   b3.onclick = () => {
-    if (confirm('Gesamten Fortschritt löschen?')) {
+    if (confirm('Gesamten Fortschritt löschen? Das betrifft alle Aufgaben, Quizfragen und Karten dieses Profils und lässt sich nicht rückgängig machen.')) {
       fortschritt = { tasks: {}, serie: 0, punkte: 0 };
       speichern(); statistikZeichnen(); railZeichnen();
     }
@@ -3108,6 +3141,7 @@ function railZeichnen() {
   b5.onclick = () => { abmelden(); mobilEinklappen(); };
   fuss.append(b1, b2, b3, b4, b5);
   rail.appendChild(fuss);
+  uebersichtKnopfSetzen();
 }
 
 function mobilEinklappen() {
@@ -3115,6 +3149,15 @@ function mobilEinklappen() {
     document.body.classList.remove('rail-offen');
     document.getElementById('rail-toggle').setAttribute('aria-expanded', 'false');
   }
+}
+
+/* Zeigt den Rückweg zur Übersicht nur beim Lernen – auf Startseite, Anmeldung
+   und Jahresauswahl wäre er doppelt. */
+function uebersichtKnopfSetzen() {
+  const el = document.getElementById('btn-uebersicht');
+  if (!el) return;
+  const lehren = ['rechnen', 'quiz', 'karten', 'luecken', 'fehler', 'fall'];
+  el.hidden = !(profil && jahr !== null && lehren.includes(modus));
 }
 
 function starteAufgabe(id) {
@@ -3476,7 +3519,7 @@ function ersteAufgabe() { return TASKS.filter(passtJahr)[0] || TASKS[0]; }
 
 function kopfJahrZeichnen() {
   const el = document.querySelector('.kopf .unter');
-  if (!el) return;
+  const knopf = document.getElementById('btn-profil');
   const teile = [];
   if (profil) teile.push(profil.name);
   teile.push('Ausbildungsjahr: ' + jahrKurz());
@@ -3485,7 +3528,15 @@ function kopfJahrZeichnen() {
       : syncStand === 'fehler' ? 'nur auf diesem Rechner'
         : 'wird gespeichert');
   }
-  el.textContent = teile.join(' · ');
+  if (el) el.textContent = teile.join(' · ');
+  /* Auf dem Handy ist die Kopfzeile-Unterzeile ausgeblendet – der Name steht
+     deshalb am Knopf, damit immer sichtbar ist, wessen Fortschritt gerade läuft. */
+  if (knopf) {
+    knopf.textContent = profil ? 'Profil: ' + profil.name : 'Profil wählen';
+    knopf.setAttribute('aria-label', profil
+      ? `Angemeldet als ${profil.name}, Ausbildungsjahr ${jahrKurz()}. Profil wechseln.`
+      : 'Profil wählen');
+  }
 }
 
 function jahrSetzen(j) {
@@ -3837,6 +3888,13 @@ function starteQuiz(bereich) {
   railZeichnen();
 }
 
+/* Schmaler Balken unter dem Quizkopf – macht die Position in der Runde sichtbar,
+   ohne die Punktzahl in der Kopfzeile zu wiederholen. */
+function fortschrittsbalkenHTML(pos, gesamt) {
+  const p = gesamt ? Math.round(pos / gesamt * 100) : 0;
+  return `<div class="fortschrittsbalken" role="presentation"><i style="width:${p}%"></i></div>`;
+}
+
 function zeichneQuiz() {
   const q = quizLauf.reihe[quizLauf.idx];
   const b = BEREICHE.find(x => x.id === q.b);
@@ -3849,6 +3907,7 @@ function zeichneQuiz() {
       <div class="meta">${b ? b.name : 'Alle Bereiche'}<br>
         <span class="quiz-fortschritt">Frage ${quizLauf.idx + 1} von ${quizLauf.reihe.length} · ${quizLauf.richtig} richtig</span></div>
     </div>
+    ${fortschrittsbalkenHTML(quizLauf.idx + (beantwortet ? 1 : 0), quizLauf.reihe.length)}
 
     ${infoBlock(q, 'quiz', q.b)}
     <div class="quiz">
@@ -3865,9 +3924,9 @@ function zeichneQuiz() {
 
     <div class="aktionen">
       <button class="akt" id="btn-quiz-weiter" type="button" ${beantwortet ? '' : 'disabled'}>
-        ${quizLauf.idx + 1 < quizLauf.reihe.length ? 'Nächste Frage' : 'Auswertung'}
+        ${quizLauf.idx + 1 < quizLauf.reihe.length ? 'Weiter' : 'Auswertung'}
       </button>
-      <button class="akt zweit" id="btn-quiz-neu" type="button">Neue Fragen</button>
+      <button class="akt zweit" id="btn-quiz-neu" type="button">Neues Set</button>
       <span class="einheit">${beantwortet ? '' : 'Antwort auswählen'}</span>
     </div>`;
 
@@ -3912,14 +3971,27 @@ function zeigeQuizAufloesung() {
     if (i === q.r) btn.classList.add('richtig');
     if (i === quizLauf.gewaehlt && i !== q.r) btn.classList.add('falsch');
     if (i === quizLauf.gewaehlt) btn.classList.add('gewaehlt');
+    /* Klarzeichen direkt an der Zeile: die richtige Antwort bekommt ein Häkchen,
+       die falsch gewählte ein Kreuz. Ohne Symbol ist nur die Farbe der Hinweis. */
+    const marke = document.createElement('span');
+    marke.className = 'urteil-marke';
+    marke.setAttribute('aria-hidden', 'true');
+    if (i === q.r) marke.textContent = '✓';
+    else if (i === quizLauf.gewaehlt) marke.textContent = '✗';
+    if (marke.textContent) btn.appendChild(marke);
   });
   const ok = quizLauf.gewaehlt === q.r;
-  document.getElementById('quiz-erklaerung').innerHTML =
+  const erklaerung = document.getElementById('quiz-erklaerung');
+  erklaerung.className = ok ? 'gut' : 'schlecht';
+  erklaerung.innerHTML =
     `<div class="quiz-erklaerung"><b>${ok ? 'Richtig.' : 'Nicht ganz.'}</b> ${q.e}
       <div style="margin-top:8px;font-size:12.5px;color:var(--schwach)">Quelle: ${q.q_}</div></div>`;
   const w = document.getElementById('btn-quiz-weiter');
   w.disabled = false;
   blatt.querySelector('.einheit').textContent = '';
+  /* Balken nachziehen, damit der beantwortete Schritt sichtbar wird */
+  const balken = document.querySelector('.fortschrittsbalken > i');
+  if (balken) balken.style.width = Math.round((quizLauf.idx + 1) / quizLauf.reihe.length * 100) + '%';
 }
 
 function quizAuswertung() {
@@ -4414,6 +4486,17 @@ function fallAuswertung() {
 document.getElementById('rail-toggle').addEventListener('click', e => {
   const offen = document.body.classList.toggle('rail-offen');
   e.currentTarget.setAttribute('aria-expanded', String(offen));
+});
+/* Rückweg zur Übersicht – behält den Fortschritt, im Gegensatz zum Zurücksetzen. */
+document.getElementById('btn-uebersicht').addEventListener('click', () => {
+  sim = null; clearInterval(zeitGeber); startseiteZeigen();
+});
+/* Direkter Zugriff auf Name und Ausbildungsjahr – bisher nur in der Seitenleiste,
+   die auf dem Handy eingeklappt ist. */
+document.getElementById('btn-profil').addEventListener('click', () => {
+  sim = null; clearInterval(zeitGeber);
+  if (profil) abmelden(); else profilAuswahlZeigen();
+  mobilEinklappen();
 });
 
 statistikZeichnen();

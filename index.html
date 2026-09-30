@@ -95,14 +95,6 @@ body{
 }
 h1,h2,h3{text-wrap:balance;scroll-margin-top:14px}
 h1,h2,h3,h4{margin:0}
-/* Eine Überschrift trägt immer einen Nullpunkt: den kurzen Querstrich davor.
-   Er ist das eine wiederkehrende Zeichen dieser Seite und markiert den
-   Unterschied zwischen „Überschrift" und „fett gesetzter Zeile". */
-.anriss{position:relative;padding-left:13px}
-.anriss::before{
-  content:"";position:absolute;left:0;top:.42em;
-  width:7px;height:var(--kante);background:var(--tinte);
-}
 
 /* Sprungmarke zum Inhalt */
 .skip{
@@ -398,25 +390,29 @@ h1,h2,h3,h4{margin:0}
 .daten tr:last-child td{border-bottom:0}
 .daten td.z{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;overflow-wrap:normal}
 
-/* ---------- Drei Flächengewichte, nicht eines ----------
-   Vorher trugen neun Stellen dieselbe Kante `border-top:3px solid tinte`
-   (Kalkulationsblatt, Ergebnis, Quellen, Startseite, Quiz, Karte,
-   Fallstudie, Bestätigung). Damit wog eine Quellenliste so schwer wie eine
-   laufende Rechenaufgabe.
-
-     .flaeche     ruhige Fläche — Rahmen, kein Kopfbalken  (Startseite, Quellen)
-     .flaeche.blatt  ein Blatt, an dem gearbeitet wird     (Kalkulation, Quiz, Karte)
-     .flaeche.streng streng — der Kopfbalken ist rot        (Korrektur, Warnung)
-
-   Nur das Blatt bekommt die Gewichtskante. Alles andere bleibt still. */
-.flaeche{
+/* ---------- Startseite ----------
+   Auf der Startseite steht die Wahl, nicht die Arbeit. Deshalb ruhige
+   Flächen: Rahmen, matter Schatten, kein Kopfbalken. Die Gewichtskante
+   bleibt allein dem Blatt vorbehalten, an dem gerade gearbeitet wird
+   (Kalkulation, Quiz, Karte, Fallstudie, Dialog). Siehe `.schema`,
+   `.quiz`, `.karte`, `.fall-schritt`, `.bestaetig`. */
+.start{
   border:1px solid var(--linie);border-radius:var(--r-flaeche);
   background:var(--blatt);box-shadow:var(--schatten-blatt);
+  padding:20px 22px;max-width:74ch;margin-bottom:16px;
 }
-.flaeche.blatt{border-top:var(--kante) solid var(--tinte)}
-.flaeche.streng{border-top:var(--kante) solid var(--rot)}
+.start h3{
+  font-size:var(--t-gross);font-weight:600;
+  position:relative;padding-left:13px;
+}
+.start h3::before{
+  content:"";position:absolute;left:0;top:.42em;
+  width:7px;height:var(--kante);background:var(--tinte);
+}
+.start p{margin:8px 0 14px;font-size:var(--t-klein);color:var(--schwach);max-width:68ch}
+.start .formate{margin-top:14px}
 
-/* ---------- Kalkulationsblatt ---------- */
+/* ---------- Kalkulationsblatt: das Blatt, an dem gearbeitet wird ---------- */
 .schema{
   border:1px solid var(--linie);border-top:var(--kante) solid var(--tinte);
   background:var(--blatt);border-radius:var(--r-flaeche);
@@ -581,27 +577,9 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
 .bestaetig + *{overscroll-behavior:contain}
 .leer{color:var(--schwach);font-size:var(--t-text)}
 
-/* ---------- Startseite ----------
-   Auf der Startseite steht die Wahl, nicht die Arbeit. Deshalb ruhige
-   Flächen (`.flaeche`), die Abschnittsüberschrift trägt den Querstrich. */
-.start{
-  border:1px solid var(--linie);border-radius:var(--r-flaeche);
-  background:var(--blatt);box-shadow:var(--schatten-blatt);
-  padding:20px 22px;max-width:74ch;margin-bottom:16px;
-}
-.start h3{
-  font-size:var(--t-gross);font-weight:600;
-  position:relative;padding-left:13px;
-}
-.start h3::before{
-  content:"";position:absolute;left:0;top:.42em;
-  width:7px;height:var(--kante);background:var(--tinte);
-}
-.start p{margin:8px 0 14px;font-size:var(--t-klein);color:var(--schwach);max-width:68ch}
-.start .formate{margin-top:14px}
-
-/* Formate als Wahl, nicht als Kartenreihe: links die Nummer (Empfehlung),
-   daneben Name und Umfang. Volle Fläche als Zielpunkt. */
+/* ---------- Formate als Wahl, nicht als Kartenreihe ----------
+   Links die Nummer (die Lernwege folgen einer Reihenfolge), daneben
+   Umfang, Name und ein Satz. Die ganze Fläche ist ein Zielpunkt. */
 .formate{display:grid;grid-template-columns:repeat(auto-fit,minmax(216px,1fr));gap:0;
   border:1px solid var(--linie);border-radius:var(--r-flaeche);overflow:hidden}
 .format{

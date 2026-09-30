@@ -4,6 +4,34 @@ Das Format folgt *Keep a Changelog*. Bruchstellen sind ausdrücklich gekennzeich
 
 ## [Nicht veröffentlicht]
 
+### Geändert — Bildmarke neu gezeichnet (2026-09-30)
+
+- **Neue Bildmarke oben links.** Vorher: dünne Kontur, Eselsohr ohne Fläche, ein
+  Haken, der wie ein Häkchen aussah. Jetzt ein **Prüfungsbogen**: gefülltes Blatt,
+  umgeknickte Ecke als Ton, gebundener linker Rücken und ein deutlicher
+  Korrekturhaken.
+- **Warum eigenes Zeichnen statt Download:** Ein Logo von einer Stock-Seite hätte
+  eine fremde Lizenz, eine zweite Netzanfrage und würde offline brechen. Die
+  Marke ist ein Inline-SVG im Blatt — ohne Namensnennung, ohne Abhängigkeit,
+  ohne Kosten, und sie steht in jedem Browser.
+- **Jeder Wert kommt aus dem eigenen Farbsystem:** Blatt Weiß mit Tinte-Kontur ·
+  Ecke Papier `#EEF1F5` · Haken **Korrektur-Rot `#B32D25`** · Rücken exakt
+  **3 px = `--kante`**, dasselbe Maß, das jede Fläche oben trägt und das vor
+  jeder Überschrift steht. Die Marke zitiert damit wörtlich das Raster.
+- **Rot als Korrekturhaken** ist die semantisch genaueste Verwendung, die diese
+  Palette zulässt: Rot heißt im ganzen Blatt ausschließlich Korrektur. Zugleich
+  ist es der einzige Farbtupfer in der sonst einfarbigen Kopfzeile — die eine
+  Stelle, an der Farbe Aufmerksamkeit bekommt.
+- **Geometrie ausgemessen, nicht geschätzt:** Inhalt 18,5 × 17,6 Einheiten im
+  24er-Feld, Luft links 2,7 / rechts 2,8 und oben 3,2 / unten 3,2 — die Marke
+  steht also mittig, obwohl das Blatt selbst linkslastig sitzt und deshalb
+  bewusst nach rechts versetzt wurde.
+- **`forced-colors` ergänzt:** Im erzwungenen Farbmodus (Windows hoher Kontrast)
+  werden Füllungen verworfen — dann trägt nur noch die Kontur. Blatt, Ecke,
+  Rücken und Haken fallen dort auf `Canvas` / `CanvasText` zurück.
+- **Nicht mehr mit `currentColor`**, sondern mit benannten Werten: Sonst wäre der
+  Haken grau statt rot geworden (der alte Haken nutzte `currentColor`).
+
 ### Geändert — Oberfläche, Umbau von Aufbau und Design (2026-09-30)
 
 Rein darstellend. **Keine Aufgabendaten, keine Wege, keine Vertragswerte und

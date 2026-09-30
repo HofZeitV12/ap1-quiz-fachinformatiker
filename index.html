@@ -158,7 +158,10 @@ h1,h2,h3{text-wrap:balance;scroll-margin-top:14px}
   position:sticky;top:0;max-height:100vh;overflow:auto;
 }
 .rail-gruppe{margin-bottom:20px}
-.rail-gruppe > h2{
+/* Gruppenkopf der Seitenleiste ist Navigation, keine Inhaltsüberschrift —
+   deshalb ein div mit derselben Darstellung, kein h2. Sonst liest ein
+   Screenreader 12 Bereichsnamen als Dokumentgliederung vor. */
+.rail-kopf,.rail-gruppe > h2{
   font-size:11px;font-weight:600;color:var(--schwach);
   margin:0 0 7px;padding:0 18px;
   display:flex;justify-content:space-between;gap:8px;align-items:baseline;
@@ -175,7 +178,10 @@ h1,h2,h3{text-wrap:balance;scroll-margin-top:14px}
   background:none;border:0;border-left:3px solid transparent;
   padding:6px 18px 6px 15px;cursor:pointer;
   display:flex;justify-content:space-between;align-items:center;gap:8px;
+  min-height:38px;
 }
+/* Auf Fingerbedienung: mindestens 44 px Zielpunkthöhe (Apple/Google-Richtwert). */
+@media (pointer:coarse){ .rail-item{min-height:44px} }
 .rail-item:hover{background:var(--blatt)}
 .rail-item.aktiv{border-left-color:var(--tinte);background:var(--blatt);font-weight:600}
 .rail-item .z{font-family:var(--mono);font-size:11px;color:var(--schwach);font-variant-numeric:tabular-nums}
@@ -326,8 +332,7 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
 .ergebnis td{padding:6px 0;border-bottom:1px solid var(--linie-hell)}
 .ergebnis td.z{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 
-/* ---------- Quellen ---------- */
-.quellen{border:1px solid var(--linie);border-top:3px solid var(--tinte);background:var(--blatt);padding:20px 22px;max-width:74ch}
+/* ---------- Quellen ---------- */.quellen{border:1px solid var(--linie);border-top:3px solid var(--tinte);background:var(--blatt);padding:20px 22px;max-width:74ch}
 .quellen h3{font-size:14px;margin:0 0 4px}
 .quellen h3:not(:first-child){margin-top:24px;border-top:1px solid var(--linie-hell);padding-top:16px}
 .quellen p{margin:0 0 10px;font-size:13.5px;color:var(--schwach)}
@@ -338,6 +343,21 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   margin-top:20px;padding:12px 15px;background:var(--papier);
   border-left:3px solid var(--rot);font-size:13.5px;
 }
+
+/* ---------- Bestätigung: eigene Fläche statt confirm() ----------
+   Ein dialog bringt Fokusfang, Escape und die richtige Rolle von Haus aus mit;
+   confirm() ist nicht gestaltbar, blockiert den Hauptfaden und wirkt je nach
+   Browser fremd. */
+.bestaetig{
+  border:1px solid var(--linie);border-top:3px solid var(--tinte);
+  background:var(--blatt);color:var(--tinte);
+  padding:20px 22px;max-width:44ch;margin:auto;
+  box-shadow:0 18px 45px rgba(17,28,46,.22);
+}
+.bestaetig::backdrop{background:rgba(17,28,46,.45)}
+.bestaetig h2{margin:0 0 8px;font-size:17px;font-weight:700}
+.bestaetig p{margin:0 0 18px;font-size:13.5px;color:var(--schwach);line-height:1.5}
+.bestaetig-aktionen{display:flex;gap:10px;flex-wrap:wrap}
 .leer{color:var(--schwach);font-size:14px}
 
 /* ---------- Startseite ---------- */
@@ -500,6 +520,7 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   display:none;font:inherit;font-size:13px;font-weight:500;
   background:transparent;color:var(--tinte);border:1px solid var(--tinte);
   padding:6px 13px;border-radius:var(--r);cursor:pointer;
+  align-items:center;min-height:44px;
 }
 .rail-toggle:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
 /* Rückweg zur Übersicht – im Lernfluss sichtbar, ohne den Fortschritt zu löschen */
@@ -507,6 +528,7 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   font:inherit;font-size:13px;font-weight:500;
   background:transparent;color:var(--tinte);border:1px solid var(--schwach);
   padding:6px 13px;border-radius:var(--r);cursor:pointer;
+  display:inline-flex;align-items:center;min-height:44px;
 }
 .heim:hover{background:var(--papier);border-color:var(--tinte)}
 .heim:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
@@ -520,8 +542,11 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
     border-right:0;border-bottom:1px solid var(--linie);
     padding-bottom:calc(16px + env(safe-area-inset-bottom));
   }
-  body.rail-offen .rail{display:block}
-  .rail-toggle{display:inline-block}
+  body.rail-offen .rail{display:flex;flex-direction:column}
+  .rail-toggle{display:inline-flex}
+  /* Erklärender Hinweis gehört mobil nach unten; er schiebt sonst zwischen
+     Kopfzeile und erstem Lernschritt und drängt den Inhalt aus dem Bild. */
+  .rail-legende{order:9}
   .kopf{gap:12px;padding:13px max(16px,env(safe-area-inset-right)) 13px max(16px,env(safe-area-inset-left))}
   .kopf .unter{display:none}
   .kopf .stats{margin-left:0;gap:16px;width:100%}
@@ -597,6 +622,15 @@ button.akt:focus-visible{outline:2px solid var(--tinte);outline-offset:2px}
   <nav class="rail" id="rail" aria-label="Aufgabenbereiche"></nav>
   <main class="blatt" id="blatt" tabindex="-1" aria-live="polite" aria-atomic="false"></main>
 </div>
+
+<dialog class="bestaetig" id="bestaetig" aria-labelledby="bestaetig-titel">
+  <h2 id="bestaetig-titel">Fortschritt zurücksetzen?</h2>
+  <p id="bestaetig-text">Das betrifft alle Aufgaben, Quizfragen und Karten dieses Profils. Es lässt sich nicht rückgängig machen.</p>
+  <div class="bestaetig-aktionen">
+    <button class="akt" type="button" id="bestaetig-ja">Zurücksetzen</button>
+    <button class="akt zweit" type="button" id="bestaetig-nein">Abbrechen</button>
+  </div>
+</dialog>
 
 <script>
 /* ============================================================
@@ -3031,10 +3065,17 @@ const rail = document.getElementById('rail');
 function railZeichnen() {
   rail.innerHTML = '';
 
+  /* Sprungmarke zur Position im Baum – die Zahl wird unten gesetzt. */
+  const zUnter = document.createElement('span');
+  zUnter.setAttribute('aria-hidden', 'true');
+  const zOben = document.createElement('span');
+  zOben.setAttribute('aria-hidden', 'true');
+
   /* --- Formate --- */
   const fGruppe = document.createElement('div');
   fGruppe.className = 'rail-gruppe';
-  const fh = document.createElement('h2');
+  const fh = document.createElement('div');
+  fh.className = 'rail-kopf';
   fh.innerHTML = '<span>Formate</span><span class="haeufig">6</span>';
   fGruppe.appendChild(fh);
   const formate = [
@@ -3051,7 +3092,7 @@ function railZeichnen() {
     btn.className = 'rail-item' + (modus === f.id ? ' aktiv' : '');
     btn.type = 'button';
     btn.innerHTML = `<span>${f.name}</span><span class="z">${f.z}</span>`;
-    btn.onclick = () => { sim = null; clearInterval(zeitGeber); f.fn(); mobilEinklappen(); };
+    btn.onclick = () => { sim = null; clearInterval(zeitGeber); starteBereich(f.id); mobilEinklappen(); };
     fGruppe.appendChild(btn);
   }
   rail.appendChild(fGruppe);
@@ -3073,7 +3114,8 @@ function railZeichnen() {
 
     const gruppe = document.createElement('div');
     gruppe.className = 'rail-gruppe';
-    const h = document.createElement('h2');
+    const h = document.createElement('div');
+    h.className = 'rail-kopf';
     h.innerHTML = `<span>${b.name}</span><span class="haeufig" title="Wie häufig dieses Thema in AP1 vorkam (Auswertung 2021–2026)">${b.haeufig}</span>`;
     gruppe.appendChild(h);
 
@@ -3084,6 +3126,9 @@ function railZeichnen() {
       const f = fortschritt.tasks[t.id];
       const q = f && f.max ? Math.round(f.punkte / f.max * 100) : null;
       btn.innerHTML = `<span>${t.titel}</span><span class="z${q !== null && q >= 80 ? ' voll' : ''}">${q === null ? '–' : q + ' %'}</span>`;
+      /* Fortschritt ist eine Prozentzahl, keine bloße Ziffer: für Vorleser
+         als "84 Prozent" statt "84" ausgeben. */
+      btn.setAttribute('aria-label', t.titel + (q === null ? ', noch kein Versuch' : ', ' + q + ' Prozent Fortschritt'));
       btn.onclick = () => {
         sim = null; clearInterval(zeitGeber); modus = 'rechnen'; starteAufgabe(t.id);
         mobilEinklappen();
@@ -3097,7 +3142,7 @@ function railZeichnen() {
       btn.className = 'rail-item' + (modus === 'quiz' && quizLauf && quizLauf.bereich === b.id ? ' aktiv' : '');
       btn.type = 'button';
       btn.innerHTML = `<span>↳ Quiz zu diesem Bereich</span><span class="z">${quizN}</span>`;
-      btn.onclick = () => { sim = null; clearInterval(zeitGeber); starteQuiz(b.id); mobilEinklappen(); };
+      btn.onclick = () => { sim = null; clearInterval(zeitGeber); adresseSetzen(b.id); starteQuiz(b.id); mobilEinklappen(); };
       gruppe.appendChild(btn);
     }
     if (kartenN) {
@@ -3105,7 +3150,7 @@ function railZeichnen() {
       btn.className = 'rail-item' + (modus === 'karten' && kartenLauf && kartenLauf.bereich === b.id ? ' aktiv' : '');
       btn.type = 'button';
       btn.innerHTML = `<span>↳ Karteikarten zu diesem Bereich</span><span class="z">${kartenN}</span>`;
-      btn.onclick = () => { sim = null; clearInterval(zeitGeber); starteKarten(b.id); mobilEinklappen(); };
+      btn.onclick = () => { sim = null; clearInterval(zeitGeber); adresseSetzen(b.id); starteKarten(b.id); mobilEinklappen(); };
       gruppe.appendChild(btn);
     }
     rail.appendChild(gruppe);
@@ -3113,7 +3158,7 @@ function railZeichnen() {
 
   const fuss = document.createElement('div');
   fuss.className = 'rail-fuss rail-gruppe';
-  fuss.innerHTML = `<h2><span>Mehr</span></h2>`;
+  fuss.innerHTML = `<div class="rail-kopf"><span>Mehr</span></div>`;
   const b1 = document.createElement('button');
   b1.className = 'rail-item'; b1.type = 'button';
   b1.innerHTML = '<span>Prüfungssimulation starten</span><span class="z">90 min</span>';
@@ -3125,12 +3170,7 @@ function railZeichnen() {
   const b3 = document.createElement('button');
   b3.className = 'rail-item'; b3.type = 'button';
   b3.innerHTML = '<span>Fortschritt zurücksetzen</span><span class="z">reset</span>';
-  b3.onclick = () => {
-    if (confirm('Gesamten Fortschritt löschen? Das betrifft alle Aufgaben, Quizfragen und Karten dieses Profils und lässt sich nicht rückgängig machen.')) {
-      fortschritt = { tasks: {}, serie: 0, punkte: 0 };
-      speichern(); statistikZeichnen(); railZeichnen();
-    }
-  };
+  b3.onclick = () => { zurueckDialogOeffnen(); };
   const b4 = document.createElement('button');
   b4.className = 'rail-item'; b4.type = 'button';
   b4.innerHTML = '<span>Ausbildungsjahr wechseln</span><span class="z">' + jahrKurz() + '</span>';
@@ -3142,6 +3182,34 @@ function railZeichnen() {
   fuss.append(b1, b2, b3, b4, b5);
   rail.appendChild(fuss);
   uebersichtKnopfSetzen();
+
+  /* Position im Baum: "Bereich 3, Thema 5 von 12" – ohne diesen Satz liest ein
+     Screenreader die lange Liste ohne jeden Anker vor. */
+  const sichtbar = [...rail.querySelectorAll('.rail-item')].filter(b => b.offsetParent !== null);
+  const pos = sichtbar.indexOf(rail.querySelector('.rail-item.aktiv')) + 1;
+  rail.setAttribute('aria-label', 'Aufgabenbereiche' + (pos ? ' – Position ' + pos + ' von ' + sichtbar.length : ''));
+}
+
+/* ---------- Bestätigung mit eigener Fläche ---------- */
+function bestaetigen(titel, text, onJa) {
+  const dlg = document.getElementById('bestaetig');
+  document.getElementById('bestaetig-titel').textContent = titel;
+  document.getElementById('bestaetig-text').textContent = text;
+  const ja = document.getElementById('bestaetig-ja');
+  const nein = document.getElementById('bestaetig-nein');
+  const schliessen = () => { if (dlg.open) dlg.close(); };
+  nein.onclick = schliessen;
+  ja.onclick = () => { schliessen(); onJa(); };
+  dlg.showModal();
+  nein.focus();
+}
+
+function zurueckDialogOeffnen() {
+  bestaetigen(
+    'Gesamten Fortschritt zurücksetzen?',
+    'Alle Aufgaben, Quizfragen und Karten dieses Profils beginnen von vorn. Das lässt sich nicht rückgängig machen.',
+    () => { fortschritt = { tasks: {}, serie: 0, punkte: 0 }; speichern(); statistikZeichnen(); railZeichnen(); }
+  );
 }
 
 function mobilEinklappen() {
@@ -3488,6 +3556,7 @@ function quellenZeigen() {
         <b>Themenliste</b> des amtlichen Prüfungskatalogs und den eigenen Unterlagen neu formuliert.
       </div>
     </div>`;
+  adresseSetzen(null);
   railZeichnen();
 }
 
@@ -3781,7 +3850,10 @@ function startseiteZeigen() {
      (Ein Vergleich mit `modus` wäre hier falsch: der startet als 'rechnen'.) */
   if (!profil) { profilAuswahlZeigen(); return; }
   if (jahr === null) { jahrAuswahlZeigen(); return; }
+  /* Ein Bereich aus dem Link hat Vorrang vor der Startseite. */
+  if (wunschBereich) { wunschBereichAusfuehren(); return; }
   modus = 'start';
+  adresseSetzen(null);
   kopfJahrZeichnen();
   const sim2 = sim ? '' : '';
   blatt.innerHTML = `
@@ -3905,13 +3977,13 @@ function zeichneQuiz() {
     <div class="kopfstreifen">
       <h2>Multiple-Choice-Quiz</h2>
       <div class="meta">${b ? b.name : 'Alle Bereiche'}<br>
-        <span class="quiz-fortschritt">Frage ${quizLauf.idx + 1} von ${quizLauf.reihe.length} · ${quizLauf.richtig} richtig</span></div>
+        <span class="quiz-fortschritt" id="quiz-kopf-fortschritt">Frage ${quizLauf.idx + 1} von ${quizLauf.reihe.length} · ${quizLauf.richtig} richtig</span></div>
     </div>
     ${fortschrittsbalkenHTML(quizLauf.idx + (beantwortet ? 1 : 0), quizLauf.reihe.length)}
 
     ${infoBlock(q, 'quiz', q.b)}
     <div class="quiz">
-      <div class="quiz-frage">${q.q}</div>
+      <div class="quiz-frage" id="quiz-frage">${q.q}</div>
       <div class="quiz-optionen">
         ${q.a.map((t, i) => `<button class="quiz-opt" type="button" data-i="${i}"
             aria-label="Antwort ${buchstaben[i]}: ${t.replace(/"/g, '&quot;')}"
@@ -3927,7 +3999,11 @@ function zeichneQuiz() {
         ${quizLauf.idx + 1 < quizLauf.reihe.length ? 'Weiter' : 'Auswertung'}
       </button>
       <button class="akt zweit" id="btn-quiz-neu" type="button">Neues Set</button>
-      <span class="einheit">${beantwortet ? '' : 'Antwort auswählen'}</span>
+      <span class="einheit" role="status" aria-live="polite">${beantwortet
+        ? ''
+        : quizLauf.idx === 0 && quizLauf.gewaehlt === null
+          ? 'Antwort auswählen'
+          : 'Antwort auswählen · ' + (quizLauf.richtig) + ' bisher richtig'}</span>
     </div>`;
 
   infoVerdrahten();
@@ -3959,6 +4035,7 @@ function zeichneQuiz() {
     }
   };
   document.getElementById('btn-quiz-neu').onclick = () => starteQuiz(quizLauf.bereich);
+  adresseSetzen(quizLauf.bereich);
 
   if (beantwortet) zeigeQuizAufloesung();
 }
@@ -3989,6 +4066,9 @@ function zeigeQuizAufloesung() {
   const w = document.getElementById('btn-quiz-weiter');
   w.disabled = false;
   blatt.querySelector('.einheit').textContent = '';
+  /* Position laut mitteilen: der Balken allein ist für Vorleser unsichtbar. */
+  const kopf = document.getElementById('quiz-kopf-fortschritt');
+  if (kopf) kopf.textContent = `Frage ${quizLauf.idx + 1} von ${quizLauf.reihe.length} · ${quizLauf.richtig} richtig`;
   /* Balken nachziehen, damit der beantwortete Schritt sichtbar wird */
   const balken = document.querySelector('.fortschrittsbalken > i');
   if (balken) balken.style.width = Math.round((quizLauf.idx + 1) / quizLauf.reihe.length * 100) + '%';
@@ -4153,10 +4233,13 @@ function kartenAuswertung() {
       </div>
     </div>`;
   document.getElementById('k-nochmal').onclick = () => starteKarten(kartenLauf.bereich);
+  adresseSetzen(kartenLauf.bereich);
   document.getElementById('k-reset').onclick = () => {
-    if (confirm('Karteikarten-Fortschritt zurücksetzen? Alle Karten beginnen wieder in Fach 1.')) {
-      kartenFaecher = {}; kartenSpeichern(); starteKarten(kartenLauf.bereich);
-    }
+    bestaetigen(
+      'Kartenfortschritt zurücksetzen?',
+      'Alle Karten beginnen wieder in Fach 1. Das lässt sich nicht rückgängig machen.',
+      () => { kartenFaecher = {}; kartenSpeichern(); starteKarten(kartenLauf.bereich); }
+    );
   };
   document.getElementById('k-start').onclick = startseiteZeigen;
 }
@@ -4498,6 +4581,62 @@ document.getElementById('btn-profil').addEventListener('click', () => {
   if (profil) abmelden(); else profilAuswahlZeigen();
   mobilEinklappen();
 });
+
+/* ============================================================
+   Verweis-Zustand: gewählter Bereich steht in der Adresse
+   ------------------------------------------------------------
+   Zweck: ein Link auf „genau dieses Thema" ist teilbar, der Zurück-Knopf
+   führt nicht blind aus dem Trainer, und ein Lesezeichen landet wieder
+   im richtigen Bereich. Bewusst nur EIN Parameter (?bereich=…), kein
+   Nachbau der kompletten Oberfläche in der Adresse – die Aufgaben selbst
+   werden bei jedem Aufruf neu erzeugt und sind nicht verlinkbar.
+   ============================================================ */
+const BEREICH_IDS = BEREICHE.map(b => b.id);
+
+/* Ein ?bereich=… aus dem Link ist gemerkt, bis Profil und Jahr stehen.
+   Ohne Profil zeigt der Trainer die Anmeldung – der Wunsch aus dem Link darf
+   dabei nicht verloren gehen, sonst landet ein geteilter Link nie am Ziel. */
+let wunschBereich = null;
+try {
+  const ausAdresse = new URL(window.location.href).searchParams.get('bereich');
+  if (ausAdresse && BEREICH_IDS.includes(ausAdresse)) wunschBereich = ausAdresse;
+} catch (e) { /* ohne Adresskontext kein Grund abzubrechen */ }
+
+/* Wird von der Startseite aufgerufen, sobald Profil und Jahr feststehen. */
+function wunschBereichAusfuehren() {
+  if (!wunschBereich || !profil || jahr === null) return;
+  const ziel = wunschBereich;
+  wunschBereich = null;
+  adresseSetzen(ziel);
+  /* Ein Bereichslink soll in genau diesem Bereich landen. Reihenfolge:
+     erst Quiz zu diesem Bereich (immer vorhanden), sonst die erste
+     Rechenaufgabe dieses Bereichs, sonst ersatzweise irgendetwas. */
+  const hatQuiz = QUIZ.some(q => q.b === ziel && passtJahr(q));
+  if (hatQuiz) return starteQuiz(ziel);
+  const aufgabe = TASKS.find(t => t.bereich === ziel && passtJahr(t));
+  if (aufgabe) { modus = 'rechnen'; return starteAufgabe(aufgabe.id); }
+  starteQuiz(ziel);
+}
+
+function adresseSetzen(bereich) {
+  try {
+    const url = new URL(window.location.href);
+    if (bereich && BEREICH_IDS.includes(bereich)) url.searchParams.set('bereich', bereich);
+    else url.searchParams.delete('bereich');
+    const neu = url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : '') + url.hash;
+    history.replaceState(null, '', neu);
+  } catch (e) { /* Adresse ohne history-Umgebung: kein Grund abzubrechen */ }
+}
+
+function starteBereich(id) {
+  if (id === 'start') { modus = 'start'; adresseSetzen(null); startseiteZeigen(); return; }
+  if (id === 'rechnen') { modus = 'rechnen'; adresseSetzen(null); starteAufgabe(ersteAufgabe().id); return; }
+  if (id === 'quiz') { adresseSetzen(null); starteQuiz(); return; }
+  if (id === 'karten') { adresseSetzen(null); starteKarten(); return; }
+  if (id === 'luecken') { adresseSetzen(null); starteLuecken(); return; }
+  if (id === 'fehler') { adresseSetzen(null); starteFehler(); return; }
+  if (id === 'fall') { adresseSetzen(null); starteFall(); return; }
+}
 
 statistikZeichnen();
 startseiteZeigen();

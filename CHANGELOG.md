@@ -89,6 +89,64 @@ Das Format folgt *Keep a Changelog*. Bruchstellen sind ausdrücklich gekennzeich
 - **Zurücksetzen-Warnung** nennt jetzt die Folge: „…betrifft alle Aufgaben,
   Quizfragen und Karten dieses Profils und lässt sich nicht rückgängig machen."
 
+### Geändert — Barrierefreiheit und Verweise (2026-09-30, Nachmittag)
+
+- **Seitenleiste ist keine Dokumentgliederung mehr.** Die Bereichsnamen standen
+  als `<h2>` in der Navigation. Ein Screenreader las damit zwölf
+  Navigationsgruppen als Inhaltsüberschriften vor. Sie sind jetzt `<div
+  class="rail-kopf">` mit unveränderter Darstellung; im Navigationsbaum sind
+  **0 Überschriften**, vorher 12.
+- **Fortschritt wird angesagt, nicht nur gezeigt.** Eine Zahl wie „84“ klang für
+  Vorleser wie eine bloße Ziffer. Jeder Eintrag trägt jetzt
+  `aria-label="…, 84 Prozent Fortschritt"`, ohne Versuch „…, noch kein Versuch".
+- **Position im Baum.** Die Navigation hat
+  `aria-label="Aufgabenbereiche – Position 3 von 51"` – ein Anker in einer
+  51 Punkte langen Liste.
+- **Quiz-Fortschritt live** (`.quiz-fortschritt`): Der Zähler „Frage 3 von 12 ·
+  1 richtig“ steht in einer `role="status"`-Fläche und wird nach jeder Antwort
+  neu gesetzt. Der Balken allein war für Vorleser unsichtbar.
+- **Eigene Bestätigungsfläche statt `confirm()`** (`.bestaetig`, `<dialog>`).
+  Betrifft „Fortschritt zurücksetzen“ und „Kartenfortschritt zurücksetzen“.
+  Eigener Dialog bringt Fokusfang, Escape und `::backdrop` mit; `confirm()`
+  blockiert den Hauptfaden und ist nicht gestaltbar. „Abbrechen“ ist
+  vorfokussiert, der Fokus kehrt zum Auslöser zurück.
+- **Tippziele auf Fingerbedienung.** `.rail-toggle` und `.heim` waren 33 px hoch
+  und lagen unter dem Richtwert von 44 px; sie sind jetzt mindestens 44 px
+  (`@media (pointer:coarse)`), Navigationseinträge 38 px, auf Touch 44 px.
+- **Reihenfolge auf dem Handy.** Die Lesehilfe schob sich zwischen Kopfzeile und
+  ersten Lernschritt; sie steht jetzt am Ende der Leiste (`.rail-legende`,
+  `order:9`). Dabei einen Spezifitätsfehler behoben: `body.rail-offen .rail`
+  überschrieb das nötige `display:flex`.
+
+### Hinzugefügt — Verweise auf einen Bereich (2026-09-30, Nachmittag)
+
+- **`?bereich=<id>` in der Adresse.** Ein Link zeigt direkt in einen Bereich:
+  `…/?bereich=netzwerk` öffnet das Quiz zur Netzwerktechnik. Der Parameter wird
+  über `history.replaceState` gepflegt — kein Neuladen, der Zurück-Knopf bleibt
+  innerhalb des Trainers nutzbar, und ein Lesezeichen landet wieder im richtigen
+  Bereich (`adresseSetzen`, `starteBereich`).
+- **Gemerkter Wunsch über die Anmeldung hinweg** (`wunschBereich`). Wer einen
+  Bereichslink öffnet und noch kein Profil hat, sieht erst die Anmeldung und
+  landet danach trotzdem im gewünschten Bereich. Ohne dieses Merken liefe ein
+  geteilter Link ins Leere.
+- Einstieg wählt automatisch die passende Form: Quiz, wenn es Fragen zum Bereich
+  gibt, sonst die erste Rechenaufgabe des Bereichs.
+
+**Bewusst nicht** in die Adresse aufgenommen: die einzelnen Aufgaben. Sie werden
+bei jedem Aufruf neu erzeugt und sind damit nicht verlinkbar — ein Nachbau der
+Oberfläche in der Adresse wäre irreführend.
+
+### Geprüft (2026-09-30)
+
+- Qualitätstor `npm run check`: **alle 34 Prüfungen bestanden.** Der Vertrag
+  (`API`, `STORE`, `JAHR_STORE`, `PROFIL_STORE`, `KARTEN_STORE`) blieb unverändert.
+- **Alle sechs Formate am Handy (390 × 844) durchgeklickt** — kein waagerechter
+  Überlauf (`scrollWidth` bleibt 390 px):
+  Rechnen · Quiz · Karteikarten · Lückentexte · Fehlersuche · Fallstudien.
+- Interaktionen geprüft: Quiz antworten und weiterblättern (Zähler zählt mit),
+  Karte umdrehen, Lückentext prüfen, Fehlersuche markieren, Rechnung prüfen und
+  Lösungsweg anzeigen, Fallstudie auswählen.
+
 ## [1.0.0] — bis 2026-09-29
 
 ### Hinzugefügt

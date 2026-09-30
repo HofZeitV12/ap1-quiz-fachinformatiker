@@ -1,0 +1,26 @@
+# Nur das, was auf die Seite gehört, wird hochgeladen.
+#
+# Ohne diese Datei zählt für die Befehlszeile allein .gitignore, und die
+# listet zwar .vercel, node_modules und die .env-Dateien aus, aber nicht:
+#   - .env.local …… lokale Zugangsdaten (das Git-Tor prüft .gitignore,
+#                     die Befehlszeile von Vercel liest sie jedoch nicht)
+#   - _backups/ …… Sicherungen des Arbeitsrechners
+#   - die index*.html-Sicherungen
+# Ein `vercel --prod` aus diesem Ordner hätte beides mit hochgeladen.
+
+.env
+.env.*
+*.env
+*.env.local
+
+.git
+.github
+.vercel
+
+_backups/
+index.backup-*.html
+index.vor-*.html
+index.*.html
+
+node_modules/
+package-lock.json
